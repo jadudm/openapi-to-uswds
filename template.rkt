@@ -56,26 +56,30 @@
 (define (render-endpoints endpoints definitions)
   (define pieces
     (for/list ([endpoint endpoints]
-          [ndx (length endpoints)])
-      (define ep (lookup definitions endpoint #:key kv-key))      
+               [ndx (length endpoints)])
         (define toggle-target (format "accordion-endpoint-~a" ndx))
         `(div
+          (a ([name ,(format "endpoint-~a" endpoint)]))
           (h4 ([class "usa-accordion__heading"])
               (button ([type "button"]
                        [class "usa-accordion__button"]
                        [aria-expanded "false"]
                        [aria-controls ,toggle-target])
-                      ,(~a (kv-key ep))))
+                      ,(~a endpoint)))
           (div ([id ,toggle-target]
                 [class "usa-accordion__content usa-prose"])
-               (p ,(~a (deep-ref (kv-value ep) 'description)))
+               (p ,(~a (deep-ref definitions 'description)))
                (h3 "Fields")
-               ,@(for/list ([ffp (sort (hash->kvs (deep-ref (kv-value ep) 'properties)) symbol<? #:key kv-key)])
+               ,@(for/list ([ffp (pairs-in-order (deep-ref definitions endpoint 'properties))])
                    `(div ([class "grid-row"])
                          (div ([class "grid-col-4"])
-                              (h4 ,(~a (kv-key ffp))))
-                         (div ([class "grid-col-8"])
-                              (p ,(~a (hash-ref (kv-value ffp) 'description "")))))
+                              (h4 ,(~a (sorted-key ffp))))
+                         (div ([class "grid-col-2"])
+                              (br)
+                              (span ([class "usa-tag"])
+                                    ,(~a (hash-ref (sorted-value ffp) 'type ""))))
+                         (div ([class "grid-col-6"])
+                              (p ,(~a (hash-ref (sorted-value ffp) 'description "")))))
                    )))))
 
   `(div ([class "usa-accordion"])

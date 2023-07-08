@@ -23,10 +23,10 @@
   (define json
     (with-input-from-string (bytes->string/utf-8 body)
       (λ () (read-json))))
-
   (define assembled-document
-    (template #:endpoints (sort (hash-keys (hash-ref json 'definitions)) symbol<?)
-              #:definitions (hash->kvs (hash-ref json 'definitions))                              
+    (template #:endpoints (map sorted-key
+                               (stream->list (pairs-in-order (hash-ref json 'definitions))))
+              #:definitions (hash-ref json 'definitions)                              
               ))
 
   (define outp (open-output-file destination #:mode 'text #:exists 'replace))
