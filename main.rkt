@@ -69,7 +69,7 @@
 (module* main cli
   (require (submod ".."))
 
-  (define default-destination "fac-api-documentation.html")
+  (define default-destination "api-documentation.html")
   (define default-template "template.html")
   (define default-output-directory ".")
   (define default-input-directory ".")
