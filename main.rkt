@@ -12,6 +12,8 @@
 (define (process-openapi #:url url
                          #:destination-filename destination
                          #:template-filename template-filename
+                         #:output-directory outdir
+                         #:input-directory indir
                          #:title [title "FAC API version ~a documentation"]
                          #:version [version "1.0.0"]
                          )
@@ -37,9 +39,13 @@
               #:title title
               #:version version
               ))
-  (define templatep (open-input-file template-filename))
+  (define templatep (open-input-file (build-path
+                                      indir
+                                      template-filename)))
 
-  (define outfp (open-output-file destination #:mode 'text #:exists 'replace))
+  (define outfp (open-output-file (build-path
+                                   outdir
+                                   destination) #:mode 'text #:exists 'replace))
 
   (display "<!DOCTYPE html>" outfp)
   (for ([line (port->lines templatep)])
@@ -63,10 +69,10 @@
 (module* main cli
   (require (submod ".."))
 
-  
-  (define default-url "https://fac-dev-postgrest.app.cloud.gov/")
   (define default-destination "fac-api-documentation.html")
   (define default-template "template.html")
+  (define default-output-directory ".")
+  (define default-input-directory ".")
 
   
   (flag (openapi-url url)
@@ -80,12 +86,26 @@
   (flag (template-file tfname)
         ("-t" "--template" "Template filename")
         (template-file tfname))
+
+  (flag (output-directory od)
+        ("-d" "--output-directory" "Output directory")
+        (output-directory od))
+  (flag (input-directory id)
+        ("-i" "--input-directory" "Input directory")
+        (input-directory id))
   
   (program (openapi-to-uswds)
-           (process-openapi
-            #:url (or (openapi-url) default-url)
-            #:destination-filename (or (destination-file) default-destination)
-            #:template-filename (or (template-file) default-template)
-            ))
+           (cond
+             [(openapi-url)
+              (process-openapi
+               #:url (openapi-url)
+               #:destination-filename (or (destination-file) default-destination)
+               #:template-filename (or (template-file) default-template)
+               #:output-directory (or (output-directory) default-output-directory)
+               #:input-directory (or (input-directory) default-input-directory)
+               )]
+             [else
+              (printf "You must provide a URL leading to an OpenAPI specification. Exiting.~n")])
+           )
   
   (run openapi-to-uswds))

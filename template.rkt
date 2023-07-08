@@ -1,5 +1,6 @@
 #lang racket
-(require "base.rkt")
+(require "base.rkt"
+         gregor)
 (provide render)
 
 (provide (all-defined-out))
@@ -19,7 +20,13 @@
                              "API endpoints")
                          ,(endpoints->index endpoints)
                          ,(render-endpoints endpoints definitions)
-                         ))))
+                         ))
+              (div ([class "grid-row grid-gap"])
+                   (p (em
+                       ,(format "Last renedered ~a" (~t (today #:tz "America/New_York")
+                                                        "E, MMMM d, y"))
+                       )))
+              ))
   )
 
 ;;;;;
