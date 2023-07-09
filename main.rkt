@@ -101,7 +101,10 @@
 
   ;; Takes a file or URL for an OpenAPI JSON spec
   ;; and turns it into a list of Endpoint objects.
-  (define json (process-file-or-url url json-file))
+  (define json (process-file-or-url url
+                                    (build-path
+                                      input-directory
+                                      json-file)))
   (define tree (json->tree json))
 
   ;; Assembles the tree of documentation that will

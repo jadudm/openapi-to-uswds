@@ -40,6 +40,12 @@ To use a different template, it needs to be placed in the input directory. You s
 docker run -v ${PWD}:/output -v ${PWD}:/input jadudm/o2u --url <url>
 ```
 
+It is possible to run against a file instead of a URL, but it, too, should be in the input directory.
+
+```
+docker run -v ${PWD}:/output -v ${PWD}:/input jadudm/o2u --file <filename>
+```
+
 ## Running locally
 
 ```
