@@ -1,5 +1,6 @@
 *~
 compiled/**
-fac-api-documentation.html
+api-documentation.html
 o2u/**
 openapi-to-uswds
+*.json

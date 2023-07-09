@@ -4,23 +4,19 @@
 (provide (all-defined-out))
 
 
-(define (ordered-keys h fun)
-  (sort (hash-keys h) fun))
+(struct Endpoint (name description fields)
+  #:transparent)
+(struct Field (name description type format max_length)
+  #:transparent)
+(struct empty-string ())
 
-(define (pairs-in-order h #:sort-function [sort-function symbol<?])
-  (define ok (ordered-keys h sort-function))
-  (in-list (for/list ([k ok])
-             (cons k (hash-ref h k)))))
 
-(define (symbol>? a b)
-  (string>? (symbol->string a)
-            (symbol->string b)))
+(define (endpoints-in-order loe)
+  (sort loe (lambda (a b) (string<?
+                           (Endpoint-name a)
+                           (Endpoint-name b)))))
 
-(define (sorted-key o) (car o))
-(define (sorted-value o) (cdr o))
-
-#|
-(define h (hash 'a 3 'b 2 'c 1))
-(for ([p (pairs-in-order h)])
-  (printf "~a~n" (sorted-key p)))
-|#
+(define (fieldnames-in-order lof)
+  (sort lof (lambda (a b) (string<?
+                           (Field-name a)
+                           (Field-name b)))))
