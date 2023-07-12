@@ -20,3 +20,9 @@
   (sort lof (lambda (a b) (string<?
                            (Field-name a)
                            (Field-name b)))))
+
+;;; Contract: (-> hash? (and/c hash? immutable?))
+(define (hash->immutable-hash table)
+  (if (immutable? table) 
+      table ;; If hash is already immutable, just return it
+      (for/hash ([(k v) (in-mutable-hash table)]) (values k v))))

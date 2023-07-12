@@ -31,14 +31,25 @@
 ;; Consumes a JSON OpenAPI spec (either as a URL or a file in the filesystem)
 ;; and returns a representation of that JSON object as native Racket data structures
 ;;
-(define (process-file-or-url url json-file)
+(define (process-file-or-url url
+                             json-file
+                             #:input-directory input-directory
+                             #:api-version api-version
+                             )
   (cond
       [json-file
-       (define fp (open-input-file json-file))
+       (define fp (open-input-file (build-path
+                                      input-directory
+                                      json-file)))
        (read-json fp)]
       [url
 
-       (define res (get url))
+       (define headers (make-hash))
+       (when api-version
+         (hash-set! headers 'Accept-Profile api-version))
+
+       (define res (get url #:headers (hash->immutable-hash headers)))
+       
        (cond
          [(= 200 (response-status-code res))
           'continue]
@@ -97,14 +108,15 @@
                          #:template-filename template-filename
                          #:input-directory input-directory
                          #:output-directory output-directory
+                         #:api-version api-version
                          )
 
   ;; Takes a file or URL for an OpenAPI JSON spec
   ;; and turns it into a list of Endpoint objects.
   (define json (process-file-or-url url
-                                    (build-path
-                                      input-directory
-                                      json-file)))
+                                    json-file
+                                    #:input-directory input-directory
+                                    #:api-version api-version))
   (define tree (json->tree json))
 
   ;; Assembles the tree of documentation that will
@@ -163,6 +175,11 @@
   (flag (input-directory id)
         ("-i" "--input-directory" "Input directory")
         (input-directory id))
+
+
+  (flag (api-version apiv)
+        ("-a" "--api-version" "API version")
+        (api-version apiv))
   
   (program (openapi-to-uswds)
            (cond
@@ -170,10 +187,12 @@
               (process-openapi
                #:url (openapi-url)
                #:file (openapi-file)
+               #:version (or (api-version) "1.0.0") 
                #:destination-filename (or (destination-file) default-destination)
                #:template-filename (or (template-file) default-template)
                #:output-directory (or (output-directory) default-output-directory)
                #:input-directory (or (input-directory) default-input-directory)
+               #:api-version (api-version)
                )]
              [else
               (printf "You must provide an OpenAPI spec, either as a filename or URL. Exiting.~n")])
